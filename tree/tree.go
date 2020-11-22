@@ -1,7 +1,7 @@
 
 package tree
 
-var SIZE = 100000
+var SIZE = 10000
 
 type Tree struct {
 	Left  *Tree
