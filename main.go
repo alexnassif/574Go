@@ -3,16 +3,17 @@ package main
 import (
 	"./tree"
 	"fmt"
+	"sync"
 	"time"
 )
 
-
-func Inorder(t *tree.Tree, ch chan int) {
+func Inorder(t *tree.Tree, wg *sync.WaitGroup) {
+	defer wg.Done()
 	var stack []*tree.Tree
 
 	current := t
 
-	for current != nil || len(stack) > 0{
+	for current != nil || len(stack) > 0 {
 
 		for current != nil {
 			stack = append(stack, current)
@@ -21,55 +22,33 @@ func Inorder(t *tree.Tree, ch chan int) {
 		n := len(stack) - 1
 		current = stack[n]
 		stack = stack[:n]
-		ch <- current.Value
 		current = current.Right
 	}
 
-	close(ch)
 }
 
+func main() {
+	var wg sync.WaitGroup
+	// Code to measure
+	t := tree.New()
+	t1 := tree.New()
 
+	start := time.Now()
+	go Inorder(t, &wg)
+	wg.Add(1)
+	go Inorder(t1, &wg)
+	wg.Add(1)
 
-func main(){
-	times := make([] float64, 10)
-	for i := 0; i < 10; i++ {
-		// Code to measure
-		t := tree.New()
-		t1 := tree.New()
-		ch := make(chan int)
-		ch1 := make(chan int)
+	wg.Wait()
+	duration := time.Now()
 
-		start := time.Now()
-		go Inorder(t, ch)
-		go Inorder(t1, ch1)
+	fmt.Println(duration)
 
-		for i := 0; i < tree.SIZE; i++ {
-			fmt.Print("ch ")
-			fmt.Println(<-ch)
-		}
-		for i := 0; i < tree.SIZE; i++ {
-			fmt.Print("ch1 ")
-			fmt.Println(<-ch1)
-		}
-		duration := time.Now()
-
-		fmt.Println(duration)
-
-		// Get duration.
-		d := duration.Sub(start)
-		fmt.Println("Duration", d)
-		// Get seconds from duration.
-		s := d.Seconds()
-		fmt.Println("Seconds", s)
-		times = append(times, s)
-
-	}
-	sumOfTimes := 0.0
-	for _, num := range times {
-		sumOfTimes += num
-	}
-
-	fmt.Println(sumOfTimes/10)
-
+	// Get duration.
+	d := duration.Sub(start)
+	fmt.Println("Duration", d)
+	// Get seconds from duration.
+	s := d.Seconds()
+	fmt.Println("Seconds", s)
 
 }
