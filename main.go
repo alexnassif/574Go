@@ -28,16 +28,16 @@ func Inorder(t *tree.Tree, wg *sync.WaitGroup) {
 }
 
 func main() {
-	var wg sync.WaitGroup
+	var wg sync.WaitGroup  //used to wait for goroutines to finish
 	// Code to measure
 	t := tree.New()
 	t1 := tree.New()
 
 	start := time.Now()
+	wg.Add(1)  //should be added before the goroutine to avoid race conditions
 	go Inorder(t, &wg)
 	wg.Add(1)
 	go Inorder(t1, &wg)
-	wg.Add(1)
 
 	wg.Wait()
 	duration := time.Now()
